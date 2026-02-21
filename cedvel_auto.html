@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dərs Cədvəli</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,500;0,700;0,900;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --black: #0a0a0a;
+    --white: #f5f4f0;
+    --gray: #9a9a96;
+    --rule: #d8d7d2;
+    --red: #e8190a;
+    --m-ink: #1a6b3a;
+    --s-ink: #1a3a6b;
+  }
+
+  body {
+    background: var(--white);
+    color: var(--black);
+    font-family: 'Barlow', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  .top-bar { height: 6px; background: var(--red); width: 100%; }
+
+  /* ── WEATHER BAR ── */
+  .weather-bar {
+    background: var(--black);
+    color: var(--white);
+    padding: 10px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    max-width: 100%;
+  }
+
+  .weather-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .weather-location {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--red);
+  }
+
+  .weather-temp {
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    color: #fff;
+    line-height: 1;
+  }
+
+  .weather-desc {
+    font-size: 11px;
+    font-weight: 300;
+    letter-spacing: 0.06em;
+    color: #aaa;
+    text-transform: capitalize;
+  }
+
+  .weather-details {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+  }
+
+  .weather-detail {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #888;
+  }
+
+  .weather-detail span {
+    color: #ccc;
+    font-weight: 700;
+  }
+
+  .weather-icon {
+    font-size: 20px;
+    line-height: 1;
+  }
+
+  .weather-loading {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #666;
+    font-style: italic;
+  }
+
+  /* ── PAGE ── */
+  .page {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 56px 32px 80px;
+  }
+
+  /* ── HEADER ── */
+  header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    padding-bottom: 20px;
+    border-bottom: 2px solid var(--black);
+    gap: 16px;
+  }
+
+  .label-small {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--red);
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  h1 {
+    font-size: clamp(36px, 8vw, 64px);
+    font-weight: 900;
+    line-height: 0.92;
+    letter-spacing: -0.03em;
+    text-transform: uppercase;
+    color: var(--black);
+  }
+
+  h1 em { font-style: normal; color: var(--red); }
+
+  .header-right { text-align: right; }
+
+  .date-block {
+    font-size: 11px;
+    font-weight: 300;
+    color: var(--gray);
+    letter-spacing: 0.05em;
+    line-height: 1.6;
+  }
+
+  .week-num {
+    font-size: 48px;
+    font-weight: 900;
+    color: var(--black);
+    line-height: 1;
+    letter-spacing: -0.04em;
+    display: block;
+  }
+
+  .week-num-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gray);
+    display: block;
+    text-align: right;
+    margin-bottom: 4px;
+  }
+
+  /* ── META STRIP ── */
+  .meta-strip {
+    display: flex;
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: 40px;
+  }
+
+  .meta-item {
+    padding: 12px 32px 12px 0;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gray);
+    border-right: 1px solid var(--rule);
+    margin-right: 32px;
+  }
+
+  .meta-item:last-child { border-right: none; margin-right: 0; }
+  .meta-item strong { color: var(--black); font-weight: 700; }
+
+  /* ── LEGEND ── */
+  .legend {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 40px;
+    align-items: center;
+  }
+
+  .legend-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gray);
+    margin-right: 4px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .swatch { width: 20px; height: 4px; }
+  .swatch-m { background: var(--m-ink); }
+  .swatch-s { background: var(--s-ink); }
+
+  /* ── NO LESSON ── */
+  .no-lesson {
+    padding: 48px 0;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .no-lesson-text {
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gray);
+  }
+
+  /* ── DAY BLOCKS ── */
+  .day-block {
+    border-top: 1px solid var(--rule);
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    animation: appear 0.35s ease both;
+  }
+
+  .day-block.is-today { border-top: 2px solid var(--black); }
+  .day-block:last-child { border-bottom: 1px solid var(--rule); }
+
+  .day-col {
+    padding: 20px 24px 20px 0;
+    border-right: 1px solid var(--rule);
+  }
+
+  .day-col-name {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--black);
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .day-col-num {
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    color: var(--gray);
+    text-transform: uppercase;
+  }
+
+  .today-marker {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    background: var(--red);
+    border-radius: 50%;
+    vertical-align: middle;
+    margin-right: 4px;
+    position: relative;
+    top: -1px;
+  }
+
+  .subjects-col { padding: 0; }
+
+  .subject-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 0 16px 24px;
+    border-bottom: 1px solid var(--rule);
+    transition: background 0.1s;
+  }
+
+  .subject-row:last-child { border-bottom: none; }
+  .subject-row:hover { background: rgba(0,0,0,0.025); }
+
+  .subj-name {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--black);
+    letter-spacing: 0.01em;
+  }
+
+  .type-tag {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border: 1.5px solid currentColor;
+  }
+
+  .type-m { color: var(--m-ink); }
+  .type-s { color: var(--s-ink); }
+
+  /* ── NEXT WEEK SECTION ── */
+  .next-section { margin-top: 64px; }
+
+  .next-section-header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    padding-bottom: 20px;
+    border-bottom: 2px solid var(--black);
+    gap: 16px;
+  }
+
+  .next-section-header h2 {
+    font-size: clamp(28px, 6vw, 48px);
+    font-weight: 900;
+    line-height: 0.92;
+    letter-spacing: -0.03em;
+    text-transform: uppercase;
+    color: var(--black);
+  }
+
+  .next-section-header h2 em { font-style: normal; color: var(--red); }
+
+  .next-week-num {
+    font-size: 36px;
+    font-weight: 900;
+    color: var(--black);
+    line-height: 1;
+    letter-spacing: -0.04em;
+    display: block;
+    text-align: right;
+  }
+
+  .next-date-block {
+    font-size: 11px;
+    font-weight: 300;
+    color: var(--gray);
+    letter-spacing: 0.05em;
+    text-align: right;
+  }
+
+  .next-meta-strip {
+    display: flex;
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: 0;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    margin-top: 56px;
+    padding-top: 16px;
+    border-top: 1px solid var(--rule);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .footer-text {
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gray);
+  }
+
+  .footer-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--red);
+    border-radius: 50%;
+  }
+
+  @keyframes appear {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<div class="top-bar"></div>
+
+<!-- Weather bar -->
+<div class="weather-bar">
+  <div class="weather-left">
+    <span class="weather-location">Bakı</span>
+    <div id="weatherContent" class="weather-loading">hava yüklənir...</div>
+  </div>
+  <div class="weather-details" id="weatherDetails" style="display:none"></div>
+</div>
+
+<div class="page">
+
+  <header>
+    <div class="header-left">
+      <span class="label-small">Dərs Cədvəli · Bakı</span>
+      <h1 id="weekTitle">—<br><em>Həftə</em></h1>
+    </div>
+    <div class="header-right">
+      <span class="week-num-label">Semestr həftəsi</span>
+      <span class="week-num" id="weekNum">—</span>
+      <div class="date-block" id="dateBlock">—</div>
+    </div>
+  </header>
+
+  <div class="meta-strip">
+    <div class="meta-item" id="metaWeekType">Növ: <strong>—</strong></div>
+    <div class="meta-item">Bazar ertəsi: <strong>Dərs yoxdur</strong></div>
+  </div>
+
+  <div class="legend">
+    <span class="legend-label">İzahat —</span>
+    <div class="legend-item"><div class="swatch swatch-m"></div> Mühazirə</div>
+    <div class="legend-item"><div class="swatch swatch-s"></div> Seminar</div>
+  </div>
+
+  <div id="thisWrap"></div>
+
+  <div class="next-section">
+    <div class="next-section-header">
+      <div>
+        <span class="label-small">Növbəti Həftə</span>
+        <h2 id="nextWeekTitle">—<br><em>Həftə</em></h2>
+      </div>
+      <div>
+        <span class="week-num-label">Semestr həftəsi</span>
+        <span class="next-week-num" id="nextWeekNum">—</span>
+        <div class="next-date-block" id="nextDateBlock">—</div>
+      </div>
+    </div>
+    <div class="next-meta-strip">
+      <div class="meta-item" id="nextMetaWeekType">Növ: <strong>—</strong></div>
+    </div>
+    <div id="nextWrap"></div>
+  </div>
+
+  <footer>
+    <span class="footer-text">Semestr başlanğıcı: 17 Fevral 2025</span>
+    <div class="footer-dot"></div>
+    <span class="footer-text">Avtomatik hesablanır</span>
+  </footer>
+
+</div>
+
+<script>
+// ─────────────────────────────────────────
+// Semestr: 17 Fevral 2025 (Bazar ertəsi) = Üst Həftə 1
+// AZ: 1=BE 2=ÇA 3=Çər 4=CüA 5=Cüm 6=Şnb 7=Baz
+// JS getDay: 0=Sun 1=Mon 2=Tue 3=Wed 4=Thu 5=Fri 6=Sat
+// ─────────────────────────────────────────
+
+const SEM_START = new Date(2025, 1, 17);
+SEM_START.setHours(0,0,0,0);
+
+const SUBJECTS = {
+  'inf. sis. və ver. baza': { cycle: [0,1] },
+  'inf. təh. əsasları':     { cycle: [0,1] },
+  'multimedia tex-ları':    { cycle: [0,0,1] },
+  'sərt bacarıqlar':        { cycle: [0,1,1] },
+};
+
+const SCHEDULE = {
+  2: { ust:['inf. sis. və ver. baza','multimedia tex-ları','inf. təh. əsasları'],
+       alt:['inf. sis. və ver. baza','multimedia tex-ları','inf. təh. əsasları'] },
+  3: { ust:['inf. sis. və ver. baza','inf. təh. əsasları','multimedia tex-ları'],
+       alt:['inf. sis. və ver. baza','inf. təh. əsasları','multimedia tex-ları','sərt bacarıqlar'] },
+  4: { ust:['multimedia tex-ları','sərt bacarıqlar'],
+       alt:['multimedia tex-ları','sərt bacarıqlar'] },
+  5: { ust:['inf. sis. və ver. baza','inf. təh. əsasları','sərt bacarıqlar'],
+       alt:['inf. sis. və ver. baza','inf. təh. əsasları','sərt bacarıqlar'] },
+};
+
+const DAY_NAMES = {
+  1:'Bazar ertəsi', 2:'Çərşənbə axşamı', 3:'Çərşənbə',
+  4:'Cümə axşamı',  5:'Cümə',            6:'Şənbə', 7:'Bazar'
+};
+
+function jsToAz(d) { return d === 0 ? 7 : d; }
+
+function mondayOf(date) {
+  const d = new Date(date); d.setHours(0,0,0,0);
+  d.setDate(d.getDate() - (jsToAz(d.getDay()) - 1));
+  return d;
+}
+
+// Semester week number (1-based)
+function semesterWeek(todayMonday) {
+  const diff = todayMonday - mondayOf(SEM_START);
+  return Math.round(diff / (7*24*60*60*1000)) + 1;
+}
+
+function occurrenceIndex(subj, weekNum, dayNum, wt) {
+  let c = 0;
+  // weekNum here is 0-based index from semester start
+  for (let w = 0; w < weekNum; w++) {
+    const t = w%2===0?'ust':'alt';
+    for (let d=2;d<=5;d++) if((SCHEDULE[d]?.[t]||[]).includes(subj)) c++;
+  }
+  for (let d=2;d<dayNum;d++) if((SCHEDULE[d]?.[wt]||[]).includes(subj)) c++;
+  return c;
+}
+
+function lessonType(subj, idx) {
+  const c = SUBJECTS[subj].cycle;
+  return c[idx % c.length];
+}
+
+function mondayDateStr(monday) {
+  const fri = new Date(monday);
+  fri.setDate(fri.getDate() + 4);
+  const m = monday.toLocaleDateString('az-AZ', {day:'numeric', month:'short'});
+  const f = fri.toLocaleDateString('az-AZ', {day:'numeric', month:'short'});
+  return `${m} — ${f}`;
+}
+
+// Weather icon mapping from WMO codes
+function weatherIcon(code) {
+  if (code === 0) return '☀️';
+  if (code <= 2)  return '🌤️';
+  if (code <= 3)  return '☁️';
+  if (code <= 48) return '🌫️';
+  if (code <= 57) return '🌦️';
+  if (code <= 67) return '🌧️';
+  if (code <= 77) return '❄️';
+  if (code <= 82) return '🌧️';
+  if (code <= 86) return '🌨️';
+  if (code <= 99) return '⛈️';
+  return '🌡️';
+}
+
+function weatherDesc(code) {
+  if (code === 0)        return 'Açıq';
+  if (code <= 2)         return 'Az buludlu';
+  if (code <= 3)         return 'Buludlu';
+  if (code <= 48)        return 'Dumanlı';
+  if (code <= 57)        return 'Çiskin';
+  if (code <= 67)        return 'Yağışlı';
+  if (code <= 77)        return 'Qarlı';
+  if (code <= 82)        return 'Yağışlı';
+  if (code <= 86)        return 'Qar yağışı';
+  if (code <= 99)        return 'İldırımlı';
+  return 'Naməlum';
+}
+
+async function loadWeather() {
+  try {
+    // Open-Meteo: free, no API key needed. Baku coords: 40.4093, 49.8671
+    const url = 'https://api.open-meteo.com/v1/forecast?latitude=40.4093&longitude=49.8671&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code&wind_speed_unit=kmh&timezone=Asia%2FBaku';
+    const res = await fetch(url);
+    const data = await res.json();
+    const cur = data.current;
+
+    const temp  = Math.round(cur.temperature_2m);
+    const code  = cur.weather_code;
+    const wind  = Math.round(cur.wind_speed_10m);
+    const humid = cur.relative_humidity_2m;
+    const icon  = weatherIcon(code);
+    const desc  = weatherDesc(code);
+
+    document.getElementById('weatherContent').outerHTML = `
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span class="weather-icon">${icon}</span>
+        <span class="weather-temp">${temp}°C</span>
+        <span class="weather-desc">${desc}</span>
+      </div>
+    `;
+    document.getElementById('weatherDetails').style.display = 'flex';
+    document.getElementById('weatherDetails').innerHTML = `
+      <div class="weather-detail">Külək <span>${wind} km/s</span></div>
+      <div class="weather-detail">Rütubət <span>${humid}%</span></div>
+    `;
+  } catch(e) {
+    document.getElementById('weatherContent').textContent = 'hava məlumatı yüklənmədi';
+  }
+}
+
+function buildWeekBlocks(weekIdx, todayAzDay, isThisWeek) {
+  // weekIdx: 0-based from semester start
+  const wt = weekIdx%2===0?'ust':'alt';
+  const frag = document.createDocumentFragment();
+
+  [2,3,4,5].forEach((d, i) => {
+    const subjects = SCHEDULE[d]?.[wt] || [];
+    if (!subjects.length) return;
+
+    const isToday = isThisWeek && (d === todayAzDay);
+
+    const block = document.createElement('div');
+    block.className = 'day-block' + (isToday?' is-today':'');
+    block.style.animationDelay = (i*0.07)+'s';
+
+    const dayCol = document.createElement('div');
+    dayCol.className = 'day-col';
+    dayCol.innerHTML = `
+      <span class="day-col-name">${isToday?'<span class="today-marker"></span>':''}${DAY_NAMES[d]}</span>
+      <span class="day-col-num">${d}-ci gün</span>
+    `;
+
+    const subjCol = document.createElement('div');
+    subjCol.className = 'subjects-col';
+
+    subjects.forEach(subj => {
+      const idx = occurrenceIndex(subj, weekIdx, d, wt);
+      const isM = lessonType(subj, idx) === 0;
+      const row = document.createElement('div');
+      row.className = 'subject-row';
+      row.innerHTML = `
+        <span class="subj-name">${subj}</span>
+        <span class="type-tag ${isM?'type-m':'type-s'}">${isM?'Mühazirə':'Seminar'}</span>
+      `;
+      subjCol.appendChild(row);
+    });
+
+    block.appendChild(dayCol);
+    block.appendChild(subjCol);
+    frag.appendChild(block);
+  });
+
+  return frag;
+}
+
+function render() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const todayMon = mondayOf(today);
+
+  // 0-based week index from semester start
+  const weekIdx     = Math.round((todayMon - mondayOf(SEM_START)) / (7*24*60*60*1000));
+  const nextWeekIdx = weekIdx + 1;
+
+  const wt       = weekIdx%2===0?'ust':'alt';
+  const nextWt   = nextWeekIdx%2===0?'ust':'alt';
+  const wtLabel  = wt==='ust'?'Üst':'Alt';
+  const nextWtLabel = nextWt==='ust'?'Üst':'Alt';
+
+  // Semester week numbers (1-based)
+  const semWeek     = weekIdx + 1;
+  const nextSemWeek = nextWeekIdx + 1;
+
+  const azDay = jsToAz(today.getDay());
+
+  // This week header
+  document.getElementById('weekTitle').innerHTML = `${wtLabel}<br><em>Həftə</em>`;
+  document.getElementById('weekNum').textContent = semWeek;
+  document.getElementById('dateBlock').textContent =
+    today.toLocaleDateString('az-AZ', {day:'numeric', month:'long', year:'numeric'});
+  document.getElementById('metaWeekType').innerHTML =
+    `Həftə növü: <strong>${wtLabel}</strong>`;
+
+  // Next week header
+  document.getElementById('nextWeekTitle').innerHTML = `${nextWtLabel}<br><em>Həftə</em>`;
+  document.getElementById('nextWeekNum').textContent = nextSemWeek;
+  const nextMon = new Date(todayMon); nextMon.setDate(nextMon.getDate()+7);
+  document.getElementById('nextDateBlock').textContent = mondayDateStr(nextMon);
+  document.getElementById('nextMetaWeekType').innerHTML =
+    `Həftə növü: <strong>${nextWtLabel}</strong>`;
+
+  // This week days
+  const thisWrap = document.getElementById('thisWrap');
+  thisWrap.innerHTML = '';
+
+  const noClass = azDay===1||azDay===6||azDay===7;
+  if (noClass) {
+    const el = document.createElement('div');
+    el.className = 'no-lesson';
+    el.innerHTML = `<span class="no-lesson-text">Bu gün — ${DAY_NAMES[azDay]} — dərs yoxdur</span>`;
+    thisWrap.appendChild(el);
+  }
+
+  thisWrap.appendChild(buildWeekBlocks(weekIdx, azDay, true));
+
+  // Next week days
+  const nextWrap = document.getElementById('nextWrap');
+  nextWrap.innerHTML = '';
+  nextWrap.appendChild(buildWeekBlocks(nextWeekIdx, -1, false));
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  render();
+  loadWeather();
+});
+</script>
+</body>
+</html>
